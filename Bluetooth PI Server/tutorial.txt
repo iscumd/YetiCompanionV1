@@ -1,0 +1,26 @@
+----------------------------------
+------Building and Running--------
+----------------------------------
+
+WINDOWS x64
+-------------------
+javac -cp .;bluecove-2.1.1.jar BluetoothPIServer.java
+java -cp .;bluecove-2.1.1.jar BluetoothPIServer
+
+LINUX x64
+-------------------
+javac -cp .:bluecove-2.1.1.jar:bluecove-gpl-2.1.1.jar BluetoothPIServer.java
+java -cp .:bluecove-2.1.1.jar:bluecove-gpl-2.1.1.jar BluetoothPIServer
+
+RPI/ARM
+-------------------
+unzip bluecove-arm.zip
+javac -cp .:bluecove-2.1.1-SNAPSHOT.jar:bluecove-gpl-2.1.1-SNAPSHOT.jar BluetoothPIServer.java
+java -cp .:bluecove-2.1.1-SNAPSHOT.jar:bluecove-gpl-2.1.1-SNAPSHOT.jar BluetoothPIServer
+
+
+-modifications needed-
+
+
+sudo vim /etc/systemd/system/bluetooth.target.wants/bluetooth.service //add -C to end of ExecStart line //Might need to be done on linux too.
+sudo hciconfig hci0 piscan //This enables Discoverability
