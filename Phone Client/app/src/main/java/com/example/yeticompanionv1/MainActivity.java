@@ -75,7 +75,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         btnStartConnection.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                startConnection();
+                startBTConnection(mBTDevice,MY_UUID_INSECURE);
             }
         });
 
@@ -244,12 +244,6 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
     }
 
-    //create method for starting connection
-    //why not combine these methods
-//***remember the connection will fail and app will crash if you haven't paired first
-    public void startConnection(){
-        startBTConnection(mBTDevice,MY_UUID_INSECURE);
-    }
 
     /**
      * starting chat service method
