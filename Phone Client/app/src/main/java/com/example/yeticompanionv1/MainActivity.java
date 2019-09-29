@@ -33,4 +33,12 @@ public class MainActivity extends AppCompatActivity{
         bluetoothClient = new BluetoothClient();
         bluetoothClient.startClient(BTDevice,MY_UUID_INSECURE);
     }
+
+    public void writeToPI(){
+        //bluetoothClient.write();
+    }
+
+    public void readToActivity(){
+        
+    }
 }

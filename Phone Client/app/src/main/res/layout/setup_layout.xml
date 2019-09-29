@@ -46,31 +46,6 @@
             app:autoSizeMinTextSize="10sp"
             app:autoSizeTextType="uniform"
             android:maxLines="1"/>
-
-        <Button
-            android:id="@+id/btnSend"
-            android:text="SEND"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight=".1"
-            android:visibility="gone"
-            app:autoSizeMaxTextSize="100sp"
-            app:autoSizeMinTextSize="10sp"
-            app:autoSizeTextType="uniform"
-            android:maxLines="1"/>
-
-        <Button
-            android:id="@+id/btnDiscoverable"
-            android:text="Enable Discoverable"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight=".1"
-            android:visibility="gone"
-            app:autoSizeMaxTextSize="100sp"
-            app:autoSizeMinTextSize="10sp"
-            app:autoSizeTextType="uniform"
-            android:maxLines="1"/>
-
     </LinearLayout>
 
     <LinearLayout

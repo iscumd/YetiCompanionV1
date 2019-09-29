@@ -17,13 +17,14 @@ import java.util.ArrayList;
 class BluetoothState{
     private static final String TAG = "SetupActivity";
     private BroadcastReceiver broadcastr1,broadcastr2,broadcastr3,broadcastr4;
-    private ArrayList<BluetoothDevice> mBTDevices;
-    private DeviceListAdapter mDeviceListAdapter;
-    private MainActivity activity;
     private BluetoothAdapter mBluetoothAdapter;
-    private Button btnEnableDisable_Discoverable,btnDiscover,btnStartConnection,btnSend,btnONOFF;
+    private DeviceListAdapter mDeviceListAdapter;
+    private ArrayList<BluetoothDevice> mBTDevices;
+    private BluetoothDevice btDevice;
+    private MainActivity activity;
+
+    private Button btnDiscover,btnStartConnection,btnONOFF;
     private EditText etMACAddr;
-    private BluetoothDevice mBTDevice;
     private ListView lvNewDevices;
 
 
@@ -32,10 +33,8 @@ class BluetoothState{
     BluetoothState(MainActivity activity) {
         this.activity = activity;
         btnONOFF = (Button) activity.findViewById(R.id.btnONOFF);
-        btnEnableDisable_Discoverable = (Button) activity.findViewById(R.id.btnDiscoverable);
         btnDiscover = (Button) activity.findViewById(R.id.btnDiscoverDevices);
         btnStartConnection = (Button) activity.findViewById(R.id.btnStartConnection);
-        btnSend = (Button) activity.findViewById(R.id.btnSend);
         etMACAddr = (EditText) activity.findViewById(R.id.textMACAddress);
         lvNewDevices = (ListView) activity.findViewById(R.id.lvNewDevices);
         mBTDevices = new ArrayList<>();
@@ -49,14 +48,11 @@ class BluetoothState{
         initBroadcastReceivers();
     }
 
-    private void startBTConnection(BluetoothDevice device){
-        /*Log.d(TAG, "startBTConnection: Initializing RFCOM Bluetooth Connection.");
-        if(bluetoothClient != null)
-            bluetoothClient.startClient(device,uuid);
-        else
-            Log.d(TAG, "Bluetooth Connection not made yet.");
-         */
-        ///This function is obsolete
+    private void startBTConnection(){
+        btDevice = mBluetoothAdapter.getRemoteDevice(etMACAddr.getText().toString());
+        Log.d(TAG, "Trying to pair with " + btDevice.getName());
+        btDevice.createBond();
+        activity.initClient(btDevice);
     }
 
     private void enableDisableBT(){
@@ -80,17 +76,6 @@ class BluetoothState{
         }
     }
 
-    private void EnableDisable_Discoverable(View view) {
-        Log.d(TAG, "btnEnableDisable_Discoverable: Making device discoverable for 300 seconds.");
-
-        Intent discoverableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
-        discoverableIntent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 300);
-        activity.startActivity(discoverableIntent);
-
-        IntentFilter intentFilter = new IntentFilter(mBluetoothAdapter.ACTION_SCAN_MODE_CHANGED);
-        activity.registerReceiver( broadcastr2,intentFilter);
-    }
-
     private void Discover(View view) {
         Log.d(TAG, "btnDiscover: Looking for unpaired devices.");
 
@@ -107,6 +92,9 @@ class BluetoothState{
         }
         if(!mBluetoothAdapter.isDiscovering()){
 
+            mBTDevices.clear();
+            if(mDeviceListAdapter != null)
+                mDeviceListAdapter.clear();
             //check BT permissions in manifest
             checkBTPermissions();
 
@@ -131,14 +119,6 @@ class BluetoothState{
 
     private void initOnClick(){
 
-        btnEnableDisable_Discoverable.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Log.d(TAG, "onClick: enabling/disabling bluetooth.");
-                EnableDisable_Discoverable(view);
-            }
-        });
-
         btnDiscover.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -158,10 +138,20 @@ class BluetoothState{
         btnStartConnection.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                startBTConnection(mBTDevice);
+                startBTConnection();
             }
         });
 
+        lvNewDevices.setOnItemClickListener(new AdapterView.OnItemClickListener(){
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                mBluetoothAdapter.cancelDiscovery();
+                Log.d(TAG, "onItemClick: You Clicked on a device.");
+                Log.d(TAG, "onItemClick: deviceName = " + mBTDevices.get(i).getName());
+                Log.d(TAG, "onItemClick: deviceAddress = " + mBTDevices.get(i).getAddress());
+                etMACAddr.setText(mBTDevices.get(i).getAddress());
+            }
+        });
         /*btnSend.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -180,24 +170,6 @@ class BluetoothState{
             }
         });*/
         //obsolete/moved to a different layout and manager
-
-        lvNewDevices.setOnItemClickListener(new AdapterView.OnItemClickListener(){
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                mBluetoothAdapter.cancelDiscovery();
-
-                Log.d(TAG, "onItemClick: You Clicked on a device.");
-                String deviceName = mBTDevices.get(i).getName();
-                String deviceAddress = mBTDevices.get(i).getAddress();
-
-                Log.d(TAG, "onItemClick: deviceName = " + deviceName);
-                Log.d(TAG, "onItemClick: deviceAddress = " + deviceAddress);
-                Log.d(TAG, "Trying to pair with " + deviceName);
-                mBTDevices.get(i).createBond();
-                mBTDevice = mBTDevices.get(i);
-                activity.initClient(mBTDevice);
-            }} );
-
     }
 
     private void initBroadcastReceivers(){
@@ -295,7 +267,7 @@ class BluetoothState{
                     if (mDevice.getBondState() == BluetoothDevice.BOND_BONDED){
                         Log.d(TAG, "BroadcastReceiver: BOND_BONDED.");
                         //inside BroadcastReceiver4
-                        mBTDevice = mDevice;
+                        btDevice = mDevice;
 
                     }
                     //case2: creating a bone
