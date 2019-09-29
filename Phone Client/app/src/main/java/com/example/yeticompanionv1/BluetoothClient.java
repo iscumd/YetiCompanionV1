@@ -5,6 +5,7 @@ import android.util.*;
 
 import java.io.*;
 import java.lang.String;
+import java.lang.reflect.Method;
 import java.nio.charset.Charset;
 import java.util.*;
 
@@ -22,7 +23,7 @@ public class BluetoothClient {
 		private InputStream in;
 		private OutputStream out;
 
-		public ClientThread(BluetoothDevice device, UUID uuid) {
+		ClientThread(BluetoothDevice device, UUID uuid) {
 			Log.d(TAG, "ClientThread started.");
 			mmDevice = device;
 			deviceUUID = uuid;
@@ -30,14 +31,28 @@ public class BluetoothClient {
 		}
 
 		public void run() {
-			try {
+			/*try {
 				Log.d(TAG, "ClientThread: Trying to create InsecureRfcommSocket using UUID: " + MY_UUID_INSECURE);
 				socket = mmDevice.createRfcommSocketToServiceRecord(deviceUUID);
 			}
-			catch (IOException e) {
+			catch (Exception e) {
+				Log.e(TAG, "ClientThread: Could not create InsecureRfcommSocket " + e.getMessage());
+				return;
+			}*/
+
+
+			//-----------------------------------------------------------------------
+			try {
+				Method m = mmDevice.getClass().getMethod("createInsecureRfcommSocket", new Class[] {int.class});
+				socket = (BluetoothSocket) m.invoke(mmDevice, 1);
+			}
+			catch (Exception e){
 				Log.e(TAG, "ClientThread: Could not create InsecureRfcommSocket " + e.getMessage());
 				return;
 			}
+			//-----------------------------------------------------------------------
+
+
 			if(socket == null)
 				return;
 			
@@ -45,7 +60,7 @@ public class BluetoothClient {
 				socket.connect();
 				Log.d(TAG, "run: ClientThread connected.");
 			}
-			catch (IOException e) {
+			catch (Exception e) {
 				Log.d(TAG, "run: ClientThread: Failed with error " + e.getMessage());
 				cancel();
 				return;
@@ -96,7 +111,7 @@ public class BluetoothClient {
 			close();
 		}
 
-		void close(){
+		public void close(){
 			try {
 				Log.d(TAG, "cancel: Closing Client Socket.");
 				if(in != null)
