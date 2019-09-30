@@ -22,6 +22,7 @@ class BluetoothState{
     private ArrayList<BluetoothDevice> mBTDevices;
     private BluetoothDevice btDevice;
     private MainActivity activity;
+    private View layout;
 
     private Button btnDiscover,btnStartConnection,btnONOFF;
     private EditText etMACAddr;
@@ -44,8 +45,17 @@ class BluetoothState{
         activity.registerReceiver( broadcastr4, filter);
 
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        layout = activity.findViewById(R.id.setup_layout);
         initOnClick();
         initBroadcastReceivers();
+    }
+
+    public void show(){
+        layout.setVisibility(View.VISIBLE);
+    }
+
+    public void hide(){
+        layout.setVisibility(View.INVISIBLE);
     }
 
     private void startBTConnection(){

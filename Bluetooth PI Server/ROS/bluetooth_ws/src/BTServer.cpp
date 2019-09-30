@@ -48,12 +48,29 @@ void BTServer::Close(){
 
 
 void BTServer::Read(){
+	char buffer[9];
+	char reverse[4];
 	while(true){
-		memset(buf, 0, sizeof(buf));
-		bytes_read = read(client, buf, sizeof(buf));
+		bytes_read = read(client, buffer, sizeof(buffer));
 		if( bytes_read < 0 ) //failed to read
 			break;
-		printf("received [%s]\n", buf);
+		reverse[0] = buffer[4];
+		reverse[1] = buffer[3];
+		reverse[2] = buffer[2];
+		reverse[3] = buffer[1];
+		float result = (*(float *)reverse); //becuase java uses different Endian.
+		switch(buffer[0]){
+			case 1:
+				ly = result; //swapped because X is in the forward direction
+				break;
+			case 2:
+				lx = result;
+				break;
+			case 3:
+				az = result;
+				break;
+		}
+		//printf("received [%s]\n", buffer);
 	}
 	connected = 0;
 }

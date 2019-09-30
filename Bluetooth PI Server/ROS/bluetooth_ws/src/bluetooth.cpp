@@ -6,7 +6,7 @@
 #include "bluetooth/bluetoothmsg.h"
 
 BTServer btserver; //used for sending messages to and from Phone app
-ros::Publisher btPub;
+ros::Publisher btPub,btControlPub;
 
 
 void TurtleCallback(const geometry_msgs::Twist& msg){
@@ -28,10 +28,12 @@ void GPIOCallBack(const bluetooth::bluetoothmsg::ConstPtr& msg){
 int main(int argc, char **argv){
 	ros::init(argc, argv, "bluetooth_node");
 	ros::NodeHandle nh;
-	ros::Rate r(4);//update 4hz
+	geometry_msgs::Twist msg;
+	ros::Rate r(10);//update 10hz
 	
-	ros::Subscriber sub = nh.subscribe("turtle1/cmd_vel",1,&TurtleCallback);
+	//ros::Subscriber sub = nh.subscribe("turtle1/cmd_vel",1,&TurtleCallback);
 	btPub = nh.advertise<bluetooth::bluetoothmsg>("bluetooth/status", 5);
+	btControlPub = nh.advertise<geometry_msgs::Twist>("turtle1/cmd_vel", 5);
 	//For all the topics i want to listen too
 	/*ros::Subscriber sub = nh.subscribe("turtle1/cmd_vel",1,&TurtleCallback);
 	ros::Subscriber sub = nh.subscribe("turtle1/cmd_vel",1,&TurtleCallback);
@@ -44,6 +46,10 @@ int main(int argc, char **argv){
 		while(btserver.isConnected() && ros::ok()){//loop until connection is killed
 			ros::spinOnce();
 			r.sleep();
+			msg.linear.x = btserver.lx;
+			msg.linear.y = btserver.ly;
+			msg.angular.z = btserver.az;
+			btControlPub.publish(msg);
 		}
 		btserver.Close();
 	}

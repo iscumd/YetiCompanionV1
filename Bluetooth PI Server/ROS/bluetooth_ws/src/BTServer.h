@@ -22,7 +22,7 @@ public:
 	void Write(WriteTemp input,char type){
 	        char * output = (char *) malloc(sizeof(WriteTemp)+1);
 	        printf("Package length is  %d",sizeof(WriteTemp)+1);
-		output[0] = type;
+			output[0] = type;
 	        output[1] = input;
 	        int status = write(client,output,sizeof(WriteTemp)+1);
 	        if(status < 0){
@@ -36,6 +36,8 @@ public:
 	void Read();
 	void Close();
 	int isConnected();
+	
+	float lx,ly,az;
 };
 
 

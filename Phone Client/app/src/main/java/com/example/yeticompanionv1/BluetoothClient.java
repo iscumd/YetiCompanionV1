@@ -17,6 +17,11 @@ public class BluetoothClient {
 	private BluetoothDevice mmDevice;
 	private UUID deviceUUID;
 	private ClientThread clientThread;
+	private MainActivity activity;
+
+	BluetoothClient(MainActivity activity){
+		this.activity = activity;
+	}
 
 	private class ClientThread extends Thread {
 		private BluetoothSocket socket;
@@ -39,8 +44,6 @@ public class BluetoothClient {
 				Log.e(TAG, "ClientThread: Could not create InsecureRfcommSocket " + e.getMessage());
 				return;
 			}*/
-
-
 			//-----------------------------------------------------------------------
 			try {
 				Method m = mmDevice.getClass().getMethod("createInsecureRfcommSocket", new Class[] {int.class});
@@ -76,9 +79,15 @@ public class BluetoothClient {
 				return;
 			}
 
+			activity.runOnUiThread(new Runnable() {
+				@Override
+				public void run() {
+					activity.switchActivity(1);
+				}
+			});
 
-			//Write Loop change to writing to ROS later
-			byte[] buffer = new byte[1024];
+			//read Loop
+			byte[] buffer = new byte[9];
 			int bytes;
 			while (true) {
 				try {
@@ -87,7 +96,7 @@ public class BluetoothClient {
 					Log.d(TAG, "InputStream: " + incomingMessage);
 
 				} catch (IOException e) {
-					Log.e(TAG, "write: Error reading input stream. " + e.getMessage());
+					Log.e(TAG, "read: Error reading input stream. " + e.getMessage());
 					cancel();
 					break;
 				}
@@ -107,7 +116,7 @@ public class BluetoothClient {
 			return 1;
 		}
 
-		public void cancel() {
+		private void cancel() {
 			close();
 		}
 
@@ -124,7 +133,14 @@ public class BluetoothClient {
 			catch(IOException e){
 				Log.e(TAG, "cancel: close() of socket in clientThread failed. " + e.getMessage());
 			}
+			activity.runOnUiThread(new Runnable() {
+				   @Override
+				   public void run() {
+					   activity.switchActivity(0);
+				   }
+			});
 		}
+
 	}
 
 	public void startClient (BluetoothDevice device, UUID uuid) {
